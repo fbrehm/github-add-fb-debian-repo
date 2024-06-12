@@ -14,6 +14,7 @@ jobs:
     name: Test ${{ matrix.container }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - container: 'debian:bookworm'

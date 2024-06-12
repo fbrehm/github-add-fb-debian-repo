@@ -42,7 +42,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Show environment
+    - name: "Show environment"
       shell: bash
       env:
         DISTRO: ${{ inputs.distro }}
@@ -57,7 +57,21 @@ runs:
         env | sort
         echo "::debug::Bash enviroment: $( env | sort )"
 
-    - name: Creating sources.list
+    - name: "Updating original APT"
+      shell: bash
+      run: |
+        if [[ ! -d /etc/apt/sources.list.d/ ]] ; then
+            echo "::error::Directory '/etc/apt/sources.list.d' not found or is not a directory."
+            exit 5
+        fi
+
+        echo -e "\nUpdating APT ..."
+        echo "::group::Update"
+        apt update --yes
+        echo "::endgroup::"
+
+
+    - name: "Creating sources.list"
       shell: bash
       env:
         DISTRO: ${{ inputs.distro }}
@@ -68,11 +82,6 @@ runs:
         USE_HTTPS: ${{ inputs.use_https }}
         VENDOR: ${{ inputs.vendor }}
       run: |
-        if [[ ! -d /etc/apt/sources.list.d/ ]] ; then
-            echo "::error::Directory '/etc/apt/sources.list.d' not found or is not a directory."
-            exit 5
-        fi
-
         URL="https://"
         if [[ "${USE_HTTPS}" == false ]] ; then
             echo "::warning title=add-fb-debian-repo::Using unencrypted Repo url to '${REPO_SERVER}'."
@@ -80,9 +89,6 @@ runs:
         fi
         KEY_URL="${URL}${REPO_SERVER}${ROOT_PATH}${GPG_KEY_PATH}"
         URL+="${REPO_SERVER}${ROOT_PATH}${VENDOR}/${DISTRO}"
-
-        echo -e "\nUpdating APT ..."
-        apt update --yes
 
         echo -e "\nInstalling necessary packages ..."
         apt install --yes --no-install-recommends curl
@@ -97,9 +103,14 @@ runs:
         echo "deb	${URL}		${SUITE}" >/etc/apt/sources.list.d/fbrehm.list
         echo -e "\nContent of /etc/apt/sources.list.d/fbrehm.list:"
         cat /etc/apt/sources.list.d/fbrehm.list
+        echo -e "<--\n"
 
+    - name: "Updating APT again"
+      shell: bash
+      run: |
         echo -e "\nUpdating APT again ..."
+        echo "::group::Update"
         apt update --yes
-        echo
+        echo "::endgroup::"
 
 # vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
