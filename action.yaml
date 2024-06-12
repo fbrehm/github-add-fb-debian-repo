@@ -53,8 +53,10 @@ runs:
         USE_HTTPS: ${{ inputs.use_https }}
         VENDOR: ${{ inputs.vendor }}
       run: |
-        echo -e "Bash enviroment:"
+        echo -e "Display Bash enviroment:"
+        echo "::group::Bash enviroment:"
         env | sort
+        echo "::endgroup::"
         echo "::debug::Bash enviroment: $( env | sort )"
 
         if [[ ! -d /etc/apt/sources.list.d/ ]] ; then
@@ -76,7 +78,9 @@ runs:
         URL+="${REPO_SERVER}${ROOT_PATH}${VENDOR}/${DISTRO}"
 
         echo -e "\nInstalling necessary packages ..."
+        echo "::group::Install packages"
         apt install --yes --no-install-recommends curl
+        echo "::endgroup::"
 
         keyfile="/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc"
         echo -e "\nImporting GPG key from '${KEY_URL}' to '${keyfile}' ..."
