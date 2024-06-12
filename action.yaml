@@ -1,0 +1,105 @@
+---
+
+name: "Adding Debian repo definitions of Frank Brehm"
+author: 'Frank Brehm'
+description: 'Adding Debian repository definitions for the Repo server of Frank Brehm'
+
+inputs:
+  use_https:
+    description: 'Use HTTPS instead of HTTP as the URL schema.'
+    type: boolean
+    required: false
+    default: false
+  repo_server:
+    description: 'The FQDN of the repository server.'
+    required: false
+    type: string
+    default: 'repo.uhu-banane.de'
+  root_path:
+    description: 'The root path on the repository server.'
+    required: false
+    type: string
+    default: '/'
+  gpg_key_path:
+    description: 'The path to the GPG key of the repository on the repo server.'
+    required: false
+    type: string
+    default: 'public/repo.uhu-banane.de.gpg-key2.asc'
+  vendor:
+    description: 'The main Debian vendor (Debian or Ubuntu).'
+    required: true
+    type: string
+  distro:
+    description: 'The distribution of the vendor (buster, focal, bullshead a.s.o.)'
+    required: true
+    type: string
+  suite:
+    description: 'The suite of the distribution'
+    required: false
+    type: string
+    default: './'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Show environment
+      shell: bash
+      env:
+        DISTRO: ${{ inputs.distro }}
+        GPG_KEY_PATH: ${{ inputs.gpg_key_path }}
+        REPO_SERVER: ${{ inputs.repo_server }}
+        ROOT_PATH: ${{ inputs.root_path }}
+        SUITE: ${{ inputs.suite }}
+        USE_HTTPS: ${{ inputs.use_https }}
+        VENDOR: ${{ inputs.vendor }}
+      run: |
+        echo -e "Bash enviroment:"
+        env | sort
+        echo "::debug::Bash enviroment: $( env | sort )"
+
+    - name: Creating sources.list
+      shell: bash
+      env:
+        DISTRO: ${{ inputs.distro }}
+        GPG_KEY_PATH: ${{ inputs.gpg_key_path }}
+        REPO_SERVER: ${{ inputs.repo_server }}
+        ROOT_PATH: ${{ inputs.root_path }}
+        SUITE: ${{ inputs.suite }}
+        USE_HTTPS: ${{ inputs.use_https }}
+        VENDOR: ${{ inputs.vendor }}
+      run: |
+        if [[ ! -d /etc/apt/sources.list.d/ ]] ; then
+            echo "::error::Directory '/etc/apt/sources.list.d' not found or is not a directory."
+            exit 5
+        fi
+
+        URL="https://"
+        if [[ "${USE_HTTPS}" == false ]] ; then
+            echo "::warning title=add-fb-debian-repo::Using unencrypted Repo url to '${REPO_SERVER}'."
+            URL="http://"
+        fi
+        KEY_URL="${URL}${REPO_SERVER}${ROOT_PATH}${GPG_KEY_PATH}"
+        URL+="${REPO_SERVER}${ROOT_PATH}${VENDOR}/${DISTRO}"
+
+        echo -e "\nUpdating APT ..."
+        apt update --yes
+
+        echo -e "\nInstalling necessary packages ..."
+        apt install --yes --no-install-recommends curl
+
+        echo -e "\nImporting GPG key from '${KEY_URL}' ..."
+        mkdir --verbose --parents /etc/apt/trusted.gpg.d
+        curl --silent "${KEY_URL}" >/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc
+        echo -e "\nImported key:"
+        ls -l --color=always /etc/apt/trusted.gpg.d/
+
+        echo -e "\nCreating '/etc/apt/sources.list.d/fbrehm.list' ..."
+        echo "deb	${URL}		${SUITE}" >/etc/apt/sources.list.d/fbrehm.list
+        echo -e "\nContent of /etc/apt/sources.list.d/fbrehm.list:"
+        cat /etc/apt/sources.list.d/fbrehm.list
+
+        echo -e "\nUpdating APT again ..."
+        apt update --yes
+        echo
+
+# vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
