@@ -80,7 +80,7 @@ runs:
 
         echo -e "\nImporting GPG key from '${KEY_URL}' ..."
         mkdir --verbose --parents /etc/apt/trusted.gpg.d
-        curl --silent "${KEY_URL}" >/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc
+        curl --silent "${KEY_URL}" >/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc || true
         echo -e "\nImported key:"
         ls -l --color=always /etc/apt/trusted.gpg.d/
 
