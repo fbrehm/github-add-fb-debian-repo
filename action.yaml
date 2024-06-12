@@ -78,11 +78,20 @@ runs:
         echo -e "\nInstalling necessary packages ..."
         apt install --yes --no-install-recommends curl
 
-        echo -e "\nImporting GPG key from '${KEY_URL}' ..."
+        keyfile="/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc"
+        echo -e "\nImporting GPG key from '${KEY_URL}' to '${keyfile}' ..."
         mkdir --verbose --parents /etc/apt/trusted.gpg.d
-        curl --silent "${KEY_URL}" >/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc || true
+        curl --silent "${KEY_URL}" >"${keyfile}" || true
         echo -e "\nImported key:"
         ls -l --color=always /etc/apt/trusted.gpg.d/
+        if [[ ! -f "${keyfile}" ]] ; then
+            echo "::error::Did not get trusted key for repo '${VENDOR}/${DISTRO}'."
+            exit 6
+        fi
+        if [[ ! -s "${keyfile}" ]] ; then
+            echo "::error::Did not get trusted key for repo '${VENDOR}/${DISTRO}'."
+            exit 6
+        fi
 
         echo -e "\nCreating '/etc/apt/sources.list.d/fbrehm.list' ..."
         echo "deb	${URL}		${SUITE}" >/etc/apt/sources.list.d/fbrehm.list
