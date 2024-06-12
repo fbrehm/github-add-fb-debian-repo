@@ -5,6 +5,7 @@ on:
   push:
   pull_request:
   # schedule: [{cron: '10 23 * * 1'}]  # M H d m w (Sat 23:10)
+  workflow_dispatch:
 
 jobs:
 
