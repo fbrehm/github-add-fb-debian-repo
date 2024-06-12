@@ -49,13 +49,16 @@ jobs:
       - test
     steps:
       - uses: actions/checkout@v4
-      - id: action_without_locales
-        uses: ./.github/..
+
+      - name: "Preparing the Debian container"
+        uses: fbrehm/prepare-debian-container@main
         with:
           manage_locales: false
+
       - uses: fbrehm/github-install-pip-modules@main
         with:
           install_linter_tools: true
+
       - name: Execute Yamllint
         shell: bash
         run: yamllint action.yml .github
