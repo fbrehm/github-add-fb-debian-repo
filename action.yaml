@@ -9,7 +9,7 @@ inputs:
     description: 'Use HTTPS instead of HTTP as the URL schema.'
     type: boolean
     required: false
-    default: true
+    default: false
   repo_server:
     description: 'The FQDN of the repository server.'
     required: false
@@ -69,7 +69,7 @@ runs:
 
         URL="https://"
         if [[ "${USE_HTTPS}" == false ]] ; then
-            echo "::warning title=add-fb-debian-repo::Using unencrypted Repo url to '${REPO_SERVER}'."
+            echo "::warning title=add-fb-debian-repo::Using unencrypted Repo url to '${REPO_SERVER}' for repo '${VENDOR}/${DISTRO}'."
             URL="http://"
         fi
         KEY_URL="${URL}${REPO_SERVER}${ROOT_PATH}${GPG_KEY_PATH}"
