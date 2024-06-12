@@ -22,10 +22,10 @@ jobs:
           - container: 'debian:trixie'
             vendor: 'Debian'
             distro: 'trixie'
-          - container: 'ubuntu:bookworm'
+          - container: 'ubuntu:jammy'
             vendor: 'Ubuntu'
             distro: 'jammy'
-          - container: 'ubuntu:bookworm'
+          - container: 'ubuntu:noble'
             vendor: 'Ubuntu'
             distro: 'noble'
     container: ${{ matrix.container }}

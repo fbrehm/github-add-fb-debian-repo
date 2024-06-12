@@ -9,7 +9,7 @@ inputs:
     description: 'Use HTTPS instead of HTTP as the URL schema.'
     type: boolean
     required: false
-    default: false
+    default: true
   repo_server:
     description: 'The FQDN of the repository server.'
     required: false
