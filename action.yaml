@@ -71,7 +71,7 @@ runs:
 
         URL="https://"
         if [[ "${USE_HTTPS}" == false ]] ; then
-            echo "::warning title=add-fb-debian-repo::Using unencrypted Repo url to '${REPO_SERVER}' for repo '${VENDOR}/${DISTRO}'."
+        echo "Note: Using unencrypted Repo url to '${REPO_SERVER}' for repo '${VENDOR}/${DISTRO}'."
             URL="http://"
         fi
         KEY_URL="${URL}${REPO_SERVER}${ROOT_PATH}${GPG_KEY_PATH}"
